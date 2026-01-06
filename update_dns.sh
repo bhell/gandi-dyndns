@@ -16,8 +16,8 @@ LOG_FILE="/var/log/update_dns.log"
 CURRENT_IP=$(curl -s $IPLOOKUP)
 
 # Get the IP address and TTL of the DNS A record via the Gandi API
-DNS_INFO=$(curl -s -H "Authorization: Apikey $GANDI_API_KEY" \
-     "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
+DNS_INFO=$(curl -s -H "Authorization: Bearer $GANDI_API_KEY" \
+     "https://api.gandi.net/v5/livedns/domains/$DOMAIN/records/$SUBDOMAIN/A")
 
 # Check if the DNS record exists
 if [ -z "$DNS_INFO" ]; then
@@ -44,9 +44,9 @@ if [ "$CURRENT_IP" != "$DNS_IP" ]; then
 
     # Update the DNS A record via the Gandi API
     RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
-         -X PUT -H "Content-Type: application/json" -H "Authorization: Apikey $GANDI_API_KEY" \
+         -X PUT -H "Content-Type: application/json" -H "Authorization: Bearer $GANDI_API_KEY" \
          -d '{"rrset_values": ["'$CURRENT_IP'"], "rrset_ttl": '$TTL'}' \
-         "https://dns.api.gandi.net/api/v5/domains/$DOMAIN/records/$SUBDOMAIN/A")
+         "https://api.gandi.net/v5/livedns/domains/$DOMAIN/records/$SUBDOMAIN/A")
 
     if [ "$RESPONSE" == "200" ] || [ "$RESPONSE" == "201" ]; then
         # Log when the DNS record is updated
